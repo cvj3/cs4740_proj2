@@ -20,7 +20,6 @@ def main(param1, param2):
 
 def buildDictionary(path, filename, verboseMode=False):
     wsdDictionary = {}
-    wsdCount = -1
 
     dir = os.path.dirname(__file__)
     filename = os.path.join(dir, path + '/' + filename)
@@ -116,7 +115,7 @@ if __name__ == "__main__":
 
     # -f: the number of senteneces to generate, defaults to 1
     if "-f" in args:
-        value_index = args.index("-r") + 1
+        value_index = args.index("-f") + 1
         if len(args) <= value_index:
             print "\nExpected a field after '-f'"
             quit()
