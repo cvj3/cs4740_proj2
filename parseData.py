@@ -9,7 +9,7 @@ __author__ = "Alin Barsan, Curtis Josey"
 # load/parse/cache data-set as dictionary object
 def main(param1, param2):
     # Read and Parse XML
-    wsdData = buildData(param1, param2, True)
+    wsdData = buildData(param1, param2, False)
 
     # Write out to a dictionary file (lib/data.py)
     writeData(param1, param2, wsdData)
@@ -44,20 +44,23 @@ def buildData(path, filename, verboseMode=False):
 
             # print lex.tag, lex.attrib
 
-            #for instance in lex.iter('instance'):
-            #    print instance
-
-            answerID = []
-            for answer in lex.iter('answer'):
-                # print answer.get("instance")
-                answerID.append(answer.get("senseid"))
-
-            thisContext = ""
-            for context in lex.iter('context'):
-                thisContext += context.text + os.linesep
-
-            thisContext = thisContext.strip().replace("\r", "").replace("\n", "").replace(" n't", "n't")
-            thisContext = thisContext.replace(" '", "'") #s.replace("'", r"\'")
+            for instance in lex.iter('instance'):
+                answerID = []
+                instanceID = instance.get("id")
+                for answer in instance.iter('answer'):
+                    answerID.append(answer.get("senseid"))       
+                thisContext = ""
+                for context in instance.iter('context'):
+                    for text in context.itertext():
+                        if " " not in text:
+                            text = "<tar>" + text + "</tar>"
+                        thisContext += text
+                thisContext += os.linesep
+                thisContext = thisContext.strip().replace("\r", "").replace("\n", "").replace(" n't", "n't")
+                thisContext = thisContext.replace(" '", "'") #s.replace("'", r"\'")                
+                # build data object
+                wsdData.append({"word": key_word, "type": part_of_speech, "id": instanceID,
+                                "answer_ids": answerID, "context": thisContext })
             # training_set [ list of ????
             #                {
             #                  "word": ''
@@ -67,9 +70,6 @@ def buildData(path, filename, verboseMode=False):
             #                }
             # ]
 
-            # build data object
-            wsdData.append({"word": key_word, "type": part_of_speech, \
-                            "answer_ids": answerID, "context": thisContext })
             # wsdData[key_word] = wsdData.get(key_word, {})
             # wsdData[key_word]["defs_and_examples"] = entryDef
             # wsdData[key_word]["type"] = part_of_speech
@@ -87,7 +87,9 @@ def buildData(path, filename, verboseMode=False):
 # write dataset to dictionary object file
 def writeData(path, filename, dictionaryObject, verboseMode=False):
     f = open(path + "/" + filename.replace(".xml", ".py"), "w")
-    output = str(dictionaryObject).replace(", ", ",\n\t").replace("{", "{\n\t").replace("}", "\n}").replace("},\n\t", "},\n").replace("\t", "", 1)
+    output = str(dictionaryObject).replace("{", "{\n\t").replace("}", "\n}").replace("},\n\t", "},\n").replace("\t", "", 1)
+    # No longer replacing space after comma with newline since it messes up strings containing commas
+    # As a result, generated .py files are less readable.
     output = 'wsddata = ' + output
     f.write(output)
     f.close()

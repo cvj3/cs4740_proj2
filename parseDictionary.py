@@ -64,7 +64,9 @@ def buildDictionary(path, filename, verboseMode=False):
 
 def writeDictionary(path, filename, dictionary, verboseMode=False):
     f = open(path + "/" + filename.replace(".xml", ".py"), "w")
-    output = str(dictionary).replace(", ", ",\n\t").replace("{", "{\n\t").replace("}", "\n}").replace("},\n\t", "},\n").replace("\t", "", 1)
+    output = str(dictionary).replace("{", "{\n\t").replace("}", "\n}").replace("},\n\t", "},\n").replace("\t", "", 1)
+    # No longer replacing space after comma with newline since it messes up strings containing commas
+    # As a result, generated .py files are less readable.
     output = 'wsdDictionary = ' + output
     f.write(output)
     f.close()
