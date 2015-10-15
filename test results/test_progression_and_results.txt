@@ -56,9 +56,6 @@ possible senses.  Did not take into account that we are supposed to predict all 
 
 First Kaggle Scores following this limited approach (only one prediction is made)
 Sentence Naive: 0.51116
-Largest Naive:	 
+Largest Naive:	0.51876
 Largest Adv:	
-
-
-
 

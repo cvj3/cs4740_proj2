@@ -34,7 +34,7 @@ if __name__ == "__main__":
 				context = pair[0]
 				description = pair[1]
 				try:
-					prediction = predict_definition_by_trained_context_defs(context, target, description)
+					prediction = predict_definition_by_trained_context(context, target, description)
 				except:
 					prediction = predict_definition(context, target) #Fall back to Lesk approach if senseid has not been seen
 					summary["Lesk Fallback - " + description] = summary.get("Lesk Fallback - " + description, 0) + 1

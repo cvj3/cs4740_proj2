@@ -34,7 +34,7 @@ def filter_tokens(tokens):
 	return filtered_tokens
 
 def write_results_to_csv(results):
-	f = open("results-adv.csv", "w")
+	f = open("results-largest.csv", "w")
 	f.write("Id,Prediction\n")
 	output = "\n".join(results)
 	f.write(output)
