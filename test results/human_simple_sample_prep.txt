@@ -1,0 +1,4 @@
+Lines from training-data.xml for mech. turk questions.
+
+16726	9656	11900	39409	57553
+54122	27226	31905	58669	6043

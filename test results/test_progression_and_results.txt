@@ -1,0 +1,42 @@
+Accuracy/Size	Description
+.42 / 100	Largest: (2->4 points bonus for consecutive)(largest 4 words now) 
+.43 / 100	"" 
+.346 / 500	"" 
+0.376 / 500	"" + combined definitions and examples
+
+.26 / 100	Sentence: (2->4 points bonus for consecutive) 
+0.352 / 500	"" + combined definitions and examples 
+
+
+500 tests - largest 4 words, 4 points for consecutive and simplified lesk, added examples to defs
+Largest: .362
+Sentence: .332
+Hybrid: .316
+Random: .18, .224, .194, .21, .222, .19, .232, .214, .202, .196 (.205 on 8000 random tests)
+
+
+Comprehensive (whole set) Test:
+Largest 4 words
+4->3 Points for Consecutive (bonus) and Simplified Lesk
+Examples added to defs
+
+Result: .3476
+
+^Sentence (500): .354
+Senrence (Comprehensive): .3630
+
+
+
+Looking into comparing context words - actually using the training data to train!
+Naive Model:  Tracks the context words seen for every sense id (trained on 75% of the training data)
+Gets context for desired test case, and simply scores that context against the whole history of
+context words for every sense.  if there is an exception, it reverts to the lesk model
+Tested on 25% of the data (1965 tests).  Using "Sentence" based context approach.
+
+Result: .5690
+Lesk Fallback Rate: .0758
+
+"" for Largest
+
+Result: .5812			- I didn't expect this to perform better than the sentence approach
+Lesk Fallback Rate: .0612

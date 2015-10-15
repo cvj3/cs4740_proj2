@@ -1,29 +1,73 @@
 from common import *
-from predictDefinition import predict_definition
+from predictDefinition import predict_definition, predict_random, predict_definition_by_trained_context, predict_definition_by_trained_context_defs
 from context import get_all_contexts
 from data.trainingData import wsddata as test_set
+from random import randint
 
-
+TEST_BY_CONTEXT = True
 
 if __name__ == "__main__":
 	summary = {}
 	start()
+
+	if TEST_BY_CONTEXT: splitter = 0 # tracks index to help split training data into 75% for training, and 25% for test.
+
 	for i in range(len(test_set)):
-		text = test_set[i]["context"]
-		target = test_set[i]["word"]
-		print target.upper() + " TEST " + str(i + 1)
-		answers = test_set[i]["answer_ids"]
+		ind = i #randint(0,len(test_set)-1)
+		text = test_set[ind]["context"]
+		target = test_set[ind]["word"]
+		answers = test_set[ind]["answer_ids"]
 		contexts = get_all_contexts(text, target)
-		summary["total"] = summary.get("total", 0) + 1
-		for pair in contexts:
-			context = pair[0]
-			description = pair[1]
-			prediction = predict_definition(context, target)
-			result = "FAIL"
-			if prediction in answers:
-				result = "PASS"
-				summary[description] = summary.get(description, 0) + 1
-			print "\t" + description + "\t-\t" + result
+
+		if TEST_BY_CONTEXT:
+			splitter += 1
+			if splitter < 4: # Every 4th training item is used for testing.
+				continue
+			else:
+				splitter = 0
+			summary["total"] = summary.get("total", 0) + 1
+			print "TEST " + str(i + 1) + ": " + target.upper()
+			for pair in contexts:
+				context = pair[0]
+				description = pair[1]
+				try:
+					prediction = predict_definition_by_trained_context_defs(context, target, description)
+				except:
+					prediction = predict_definition(context, target) #Fall back to Lesk approach if senseid has not been seen
+					summary["Lesk Fallback - " + description] = summary.get("Lesk Fallback - " + description, 0) + 1 
+				result = "FAIL"
+				if prediction in answers:
+					result = "PASS"
+					summary[description] = summary.get(description, 0) + 1
+				print "\t" + description + "-" + "context" + "\t-\t" + result
+		else:
+			print "TEST " + str(i + 1) + ": " + target.upper()
+			summary["total"] = summary.get("total", 0) + 1
+			for pair in contexts:
+				context = pair[0]
+				description = pair[1]
+				prediction = predict_definition(context, target)
+				result = "FAIL"
+				if prediction in answers:
+					result = "PASS"
+					summary[description] = summary.get(description, 0) + 1
+				print "\t" + description + "\t-\t" + result
+
+
+
+		
+
+		'''
+		prediction = predict_random(target)
+		description = "Random"
+		result = "FAIL"
+		if prediction in answers:
+			result = "PASS"
+			summary[description] = summary.get(description, 0) + 1
+		print "\t" + description + "\t\t-\t" + result
+		'''
+
+
 	print "\n\nSUMMARY"
 	for description in summary.keys():
 		if description == "total": continue

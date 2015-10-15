@@ -2,15 +2,17 @@ import nltk
 #go to python shell, do import nltk, then do nltk.download(), then download all packages.
 from nltk.corpus import wordnet as wn
 from lib.Dictionary import wsdDictionary as defs
+from data.contextData import wsddata as contexts
 import sys
 import datetime
 from common import *
+from random import randint
 
 
-POINTS_FOR_CONSECUTIVE_WORD = 2
+POINTS_FOR_CONSECUTIVE_WORD = 3
 POINTS_FOR_NONCONSECUTIVE_WORD = 1
-ADDITIONAL_POINTS_FOR_SIMPLIFIED_LESK = 2
-POINTS_FOR_EXAMPLE_MATCH = .5
+ADDITIONAL_POINTS_FOR_SIMPLIFIED_LESK = 3
+#POINTS_FOR_EXAMPLE_MATCH = .5 #not currently being used
 
 def words_to_parsed_definitions(context_words, target_word):
 	definition_glob = []
@@ -27,9 +29,10 @@ def words_to_parsed_definitions(context_words, target_word):
 def score_parsed_definitions(definition_glob, target_definitions):
 	senseids_with_scores = []
 	for data in target_definitions:
-		definition = nltk.word_tokenize(data[0])
 		example = data[1]
-		senseid = data[2]
+		senseid = data[2]		
+		#definition = nltk.word_tokenize(data[0])
+		definition = nltk.word_tokenize(data[0] + " " + example)
 		fdefinition = filter_tokens(definition)
 		score = 0
 		consecutive = False
@@ -64,6 +67,66 @@ def predict_definition(context_words, target_word, verbose=False):
 		senseid = pair[0]
 		if score > highest:
 			highest = score
+			best_def = senseid
+	return best_def
+
+def predict_random(target_word):
+	definitions = defs[target_word]["defs_and_examples"]
+	ind = randint(0, len(definitions) - 1)
+	return definitions[ind][2]
+
+
+
+def predict_definition_by_trained_context(context, target_word, description):
+	target_definitions = defs[target_word]["defs_and_examples"]
+	scores = {}
+	for data in target_definitions:
+		senseid = data[2]
+		if not contexts[target_word].get(senseid):
+			continue
+		con = contexts[target_word][senseid][description]
+		for c in context:
+			if c in con:
+				scores[senseid] = scores.get(senseid, 0) + 1
+	best_def = scores.keys()[0]
+	best_score = scores[scores.keys()[0]]
+	for senseid in scores.keys():
+		score = scores[senseid]
+		if score > best_score:
+			best_score = score
+			best_def = senseid
+	return best_def
+
+def score_contexts(context_target, context_history):
+	score = 0
+	tar_glob = []
+	for word in context_target:
+		for syn in wn.synsets(word):
+			tar_glob += nltk.word_tokenize(syn.definition())
+	his_glob = []
+	for word in context_history:
+		for syn in wn.synsets(word):
+			his_glob += nltk.word_tokenize(syn.definition())
+	for item in tar_glob:
+		if item in his_glob:
+			score += 1
+	return score
+
+def predict_definition_by_trained_context_defs(context, target_word, description):
+	target_definitions = defs[target_word]["defs_and_examples"]
+	scores = {}
+	for data in target_definitions:
+		senseid = data[2]
+		if not contexts[target_word].get(senseid):
+			continue
+		con = contexts[target_word][senseid][description]
+		scores[senseid] = score_contexts(context, con)
+	best_def = scores.keys()[0]
+	best_score = scores[scores.keys()[0]]
+	for senseid in scores.keys():
+		score = scores[senseid]
+		if score > best_score:
+			best_score = score
 			best_def = senseid
 	return best_def
 
