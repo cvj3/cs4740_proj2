@@ -48,20 +48,20 @@ def get_context_from_all_words(text, target):
 
 def get_all_contexts(text, target):
 	contexts = []
-	contexts.append((get_context_from_sentence(text, target), "Sentence"))
-	#contexts.append((get_context_from_largest_words(text, target), "Largest Words"))
+	#contexts.append((get_context_from_sentence(text, target), "Sentence"))
+	contexts.append((get_context_from_largest_words(text, target), "Largest Words"))
 	#contexts.append((get_context_from_all_words(text, target), "All Words"))
 	return contexts
 
 if __name__ == "__main__":
 	start()
-	splitter = 0 # tracks index to help split training data into 75% for training, and 25% for test.
+	#splitter = 0 # tracks index to help split training data into 75% for training, and 25% for test.
 	contexts = {}
 	for i in range(len(train_set)):
-		splitter += 1
-		if splitter == 4: # Every 4th training item is left for testing.
-			splitter = 0
-			continue
+		#splitter += 1
+		#if splitter == 4: # Every 4th training item is left for testing.
+		#	splitter = 0
+		#	continue
 		text = train_set[i]["context"]
 		target = train_set[i]["word"]		
 		answers = train_set[i]["answer_ids"]
@@ -76,5 +76,5 @@ if __name__ == "__main__":
 				contexts[target][senseid][description] += context
 	end("Finished building Context object")
 	start()
-	writeData("data", "contextData.py", contexts)
+	writeData("data", "contextDataFull.py", contexts)
 	end("Finsihed writing Context Data")

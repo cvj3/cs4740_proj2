@@ -32,3 +32,10 @@ def filter_tokens(tokens):
 			token = lm.lemmatize(token)
 			filtered_tokens.append(token)
 	return filtered_tokens
+
+def write_results_to_csv(results):
+	f = open("results-adv.csv", "w")
+	f.write("Id,Prediction\n")
+	output = "\n".join(results)
+	f.write(output)
+	f.close()

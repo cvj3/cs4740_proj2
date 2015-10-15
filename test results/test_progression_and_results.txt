@@ -40,3 +40,25 @@ Lesk Fallback Rate: .0758
 
 Result: .5812			- I didn't expect this to perform better than the sentence approach
 Lesk Fallback Rate: .0612
+
+"" For Sentence with Context Defs (non-naive approach):
+
+Result: .5822
+Lesk Fallback Rate: 0
+
+"" For Largest with Context Defs (non-naive approach):
+
+Result: .5822
+Lesk Fallback Rate: 0
+
+Just realized that all above scores are for if the prediction for the target word is in the list of
+possible senses.  Did not take into account that we are supposed to predict all the possible senses
+
+First Kaggle Scores following this limited approach (only one prediction is made)
+Sentence Naive: 0.51116
+Largest Naive:	 
+Largest Adv:	
+
+
+
+
