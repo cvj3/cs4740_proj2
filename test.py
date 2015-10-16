@@ -1,11 +1,11 @@
 from common import *
 from predictDefinition import predict_definition, predict_random, predict_definition_by_trained_context, predict_definition_by_trained_context_defs
 from context import get_all_contexts
-from data.testData import wsddata as test_set
+from data.trainingData import wsddata as test_set
 from random import randint
 
 TEST_BY_CONTEXT = True
-WRITE_TEST = True
+WRITE_TEST = False
 
 if __name__ == "__main__":
 	summary = {}
@@ -36,8 +36,12 @@ if __name__ == "__main__":
 				try:
 					prediction = predict_definition_by_trained_context(context, target, description)
 				except:
-					prediction = predict_definition(context, target) #Fall back to Lesk approach if senseid has not been seen
-					summary["Lesk Fallback - " + description] = summary.get("Lesk Fallback - " + description, 0) + 1
+					try:
+						prediction = predict_definition_by_trained_context_defs(context, target, description) #fall back to context def matching if no match between contexts
+						summary["Context Def Fallback - " + description] = summary.get("Context Def Fallback - " + description, 0) + 1
+					except:
+						prediction = predict_definition(context, target) #Fall back to Lesk approach if no match between context defs
+						summary["Lesk Fallback - " + description] = summary.get("Lesk Fallback - " + description, 0) + 1
 				results.append(instance + "," + prediction)
 				if not WRITE_TEST:
 					result = "FAIL"
@@ -47,17 +51,20 @@ if __name__ == "__main__":
 					print "\t" + description + "-" + "context" + "\t-\t" + result
 				
 		else:
-			print "TEST " + str(i + 1) + ": " + target.upper()
-			summary["total"] = summary.get("total", 0) + 1
+			if not WRITE_TEST:
+				print "TEST " + str(i + 1) + ": " + target.upper()
+				summary["total"] = summary.get("total", 0) + 1
 			for pair in contexts:
 				context = pair[0]
 				description = pair[1]
 				prediction = predict_definition(context, target)
-				result = "FAIL"
-				if prediction in answers:
-					result = "PASS"
-					summary[description] = summary.get(description, 0) + 1
-				print "\t" + description + "\t-\t" + result		
+				results.append(instance + "," + prediction)
+				if not WRITE_TEST:
+					result = "FAIL"
+					if prediction in answers:
+						result = "PASS"
+						summary[description] = summary.get(description, 0) + 1
+					print "\t" + description + "\t-\t" + result		
 
 		'''
 		prediction = predict_random(target)

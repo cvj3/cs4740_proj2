@@ -2,16 +2,16 @@ import nltk
 #go to python shell, do import nltk, then do nltk.download(), then download all packages.
 from nltk.corpus import wordnet as wn
 from lib.Dictionary import wsdDictionary as defs
-from data.contextData import wsddata as contexts
+from data.contextSkip import wsddata as contexts
 import sys
 import datetime
 from common import *
 from random import randint
 
 
-POINTS_FOR_CONSECUTIVE_WORD = 3
+POINTS_FOR_CONSECUTIVE_WORD = 2
 POINTS_FOR_NONCONSECUTIVE_WORD = 1
-ADDITIONAL_POINTS_FOR_SIMPLIFIED_LESK = 3
+ADDITIONAL_POINTS_FOR_SIMPLIFIED_LESK = 4
 #POINTS_FOR_EXAMPLE_MATCH = .5 #not currently being used
 
 def words_to_parsed_definitions(context_words, target_word):
@@ -35,17 +35,17 @@ def score_parsed_definitions(definition_glob, target_definitions):
 		definition = nltk.word_tokenize(data[0] + " " + example)
 		fdefinition = filter_tokens(definition)
 		score = 0
-		consecutive = False
 		for i in range(len(definition_glob) - 1):
 			token = definition_glob[i]
 			next_token = definition_glob[i+1]
-			if token in fdefinition:
-				if consecutive: score += POINTS_FOR_CONSECUTIVE_WORD
-				else:
+			for j in range(len(fdefinition)-1):
+				currf = fdefinition[j]
+				nextf = fdefinition[j+1]
+				if token == currf: 
 					score += POINTS_FOR_NONCONSECUTIVE_WORD
-					consecutive = True
-				if next_token == "<context_word>":  # if current word is flagged as being a context word, award additional points
-					score += ADDITIONAL_POINTS_FOR_SIMPLIFIED_LESK
+					if next_token == nextf: score += POINTS_FOR_CONSECUTIVE_WORD
+					if next_token == "<context_word>":  # if current word is flagged as being a context word, award additional points
+						score += ADDITIONAL_POINTS_FOR_SIMPLIFIED_LESK
 			else:
 				consecutive = False
 		senseids_with_scores.append((senseid, score))
@@ -84,10 +84,19 @@ def predict_definition_by_trained_context(context, target_word, description):
 		senseid = data[2]
 		if not contexts[target_word].get(senseid):
 			continue
-		con = contexts[target_word][senseid][description]
-		for c in context:
-			if c in con:
-				scores[senseid] = scores.get(senseid, 0) + 1
+		history = contexts[target_word][senseid][description]	
+		for c in range(len(context)):
+			curr = context[c]
+			if c < len(context) -1: next = context[c+1]
+			else: next = "" 
+			for h in range(len(history)):
+				currh = history[h]				
+				if c < len(history) -1: nexth = history[c+1]
+				else: nexth = ""
+				if curr == currh: 
+					scores[senseid] = scores.get(senseid, 0) + 1
+					if next == nexth: scores[senseid] = scores.get(senseid, 0) + 2
+
 	best_def = scores.keys()[0]
 	best_score = scores[scores.keys()[0]]
 	for senseid in scores.keys():
@@ -103,10 +112,12 @@ def score_contexts(context_target, context_history):
 	for word in context_target:
 		for syn in wn.synsets(word):
 			tar_glob += nltk.word_tokenize(syn.definition())
+	tar_glob = list(set(tar_glob))
 	his_glob = []
 	for word in context_history:
 		for syn in wn.synsets(word):
 			his_glob += nltk.word_tokenize(syn.definition())
+	his_glob = list(set(his_glob))
 	for item in tar_glob:
 		if item in his_glob:
 			score += 1
@@ -115,11 +126,13 @@ def score_contexts(context_target, context_history):
 def predict_definition_by_trained_context_defs(context, target_word, description):
 	target_definitions = defs[target_word]["defs_and_examples"]
 	scores = {}
+	context = list(set(context))
 	for data in target_definitions:
 		senseid = data[2]
 		if not contexts[target_word].get(senseid):
 			continue
 		con = contexts[target_word][senseid][description]
+		con = list(set(con))
 		scores[senseid] = score_contexts(context, con)
 	best_def = scores.keys()[0]
 	best_score = scores[scores.keys()[0]]
@@ -129,6 +142,8 @@ def predict_definition_by_trained_context_defs(context, target_word, description
 			best_score = score
 			best_def = senseid
 	return best_def
+
+
 
 #usage: 'main.py [context_word1,context_word2] target_word'
 if __name__ == "__main__":

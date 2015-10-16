@@ -48,8 +48,8 @@ Lesk Fallback Rate: 0
 
 "" For Largest with Context Defs (non-naive approach):
 
-Result: .5822
-Lesk Fallback Rate: 0
+Result: -
+Lesk Fallback Rate: -
 
 Just realized that all above scores are for if the prediction for the target word is in the list of
 possible senses.  Did not take into account that we are supposed to predict all the possible senses
@@ -58,4 +58,107 @@ First Kaggle Scores following this limited approach (only one prediction is made
 Sentence Naive: 0.51116
 Largest Naive:	0.51876
 Largest Adv:	
+
+^ note that these were submitted using training from 75% of the data, not the full set...
+
+
+Possible improvement: predicting a U?  U happens 194/7860 cases in training = 2.4% of the time, may not
+be worth doing, as we may hurt our other 97.6% of our cases by implementing a confidence factor.
+
+
+New improvements: Score = Score / len(history context), and multi-sense prediction
+
+
+Testing Sentence - Context - Naive - 25% reserved test set with failing on not predicting all cases correctly
+Results: .5089
+Lesk Fallback Rate: .0758
+
+Testing ^ " " + score = score / len(history context) (score for a defininition is higher if a higher proportion
+of its history is matched by the current context)
+Results: .1816
+Lesk Fallback Rate:
+
+Testing ^ " " + multi-sense predictions
+Results: .1674
+Lesk Fallback Rate: .075
+Passed Multi Sense (that normally wouldnt be passed): 31
+Failed Single Sense (with multi sense prediction): 361
+
+Looking into consecutive scoring bonus for matching between contexts: (5 for consec match, 1 for normal)
+Results: .5770 vs .5690
+Lesk Fallback Rate: same (.0758)
+
+"" + ignore context words <= 3 in length
+Results: .5613 (did worse)
+
+"" + if tar word in context history, + 10 to score
+Results: .5582
+
+Just +10 for tar word match
+Results: .5751
+
++5 for tar word match, +3 for consecutive match
+Results: .5760 vs .5690
+
+
+JUST Random instead of Lesk when failing:
+Results: .5603 vs .5690
+
+JUST Unknown instead of Lesk when failing:
+Results:  .5501 vs .5690
+
++5/+3 + <= 2 word lengths thrown out of matching:
+Sentence: .5730 vs .5760
+
+
++5/+3 - 5-skipgram (takes sentence context and reduces it to a span of 10 if it is larger than 10):
+Result: .5486
+
+Def context matching b/w sentence based, where everything has been set-ified: .5826
+
+
+
+Realized that consecutive matches aren't really in consecutive phrases...
+The code is "if x is in y", x can be anywhere in y, so consecutive matches don't mean much, which 
+may account for the lack of too big a bump from rewarding consecutive matches above.
+
+This may be happening for Lesk as well, potentially explaining the less than stellar results.
+
+Fixed - sentence naive
+Result: .5913
+
+^ with +4 for consecutive, instead of +2
+-worse
+
+Lesk with better consecutive scoring: .3643
+
+
+Found bug where "tar" from the <tar> tag kept appearing in the contextData.
+Result after removed: Sentence naive:
+Result: .6010
+Lesk Fallback: .1013
+
+Falling back to context defs (adv) and then to lesk fallback (since defs outperforms lesk, and we saw
+a fallback rate of 10% - which we likely only got about 30-35% of correct, could shoot for 50-60% with adv):
+Result: .6046
+Context Def Fallback: .1013
+Lesk Fallback: 0
+
+"" + skipgram
+Result:	.6056
+Context Def Fallback: .1323
+Lesk Fallback: 0
+
+"" + skipgram with NO filtering out of context words based on pos
+Result: .5766
+Context Def Fallback: .00051
+Lesk Fallback:
+
+"" + skipgram with filtering words less than 2 in length, and "tar" and "/tar"
+Skipgram: .5710
+Sentence: .5725
+
+
+
+
 
