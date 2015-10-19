@@ -31,8 +31,8 @@ def filter_tokens(tokens):
 			filtered_tokens.append(token)
 	return filtered_tokens
 
-def write_results_to_csv(results):
-	f = open("results-sentence-skipgram.csv", "w")
+def write_results_to_csv(results, filename):
+	f = open(filename + ".csv", "w")
 	f.write("Id,Prediction\n")
 	output = "\n".join(results)
 	f.write(output)

@@ -2,11 +2,18 @@ import nltk
 #go to python shell, do import nltk, then do nltk.download(), then download all packages.
 from nltk.corpus import wordnet as wn
 from lib.Dictionary import wsdDictionary as defs
-from data.contextSkip import wsddata as contexts
+from config import TEST_BY_SENTENCE, WRITE_TEST
+if TEST_BY_SENTENCE: 	
+	if WRITE_TEST: from data.contextDataFull import wsddata as contexts
+	else: from data.contextData import wsddata as contexts
+else: 
+	if WRITE_TEST: from data.contextSkipFull import wsddata as contexts
+	else: from data.contextSkip import wsddata as contexts
 import sys
 import datetime
 from common import *
 from random import randint
+import operator
 
 
 POINTS_FOR_CONSECUTIVE_WORD = 2
@@ -27,7 +34,7 @@ def words_to_parsed_definitions(context_words, target_word):
 	return definition_glob, target_definitions
 
 def score_parsed_definitions(definition_glob, target_definitions):
-	senseids_with_scores = []
+	scores = {}
 	for data in target_definitions:
 		example = data[1]
 		senseid = data[2]		
@@ -48,26 +55,13 @@ def score_parsed_definitions(definition_glob, target_definitions):
 						score += ADDITIONAL_POINTS_FOR_SIMPLIFIED_LESK
 			else:
 				consecutive = False
-		senseids_with_scores.append((senseid, score))
-	return senseids_with_scores
-
-def print_definition_scores(senseids_with_scores):
-	print "Score:\tSenseId:"
-	for pair in senseids_with_scores:
-		print str(pair[1]) + "\t" + str(pair[0])
+		scores[senseid] = score
+	return scores
 
 def predict_definition(context_words, target_word, verbose=False):
 	definition_glob, target_definitions = words_to_parsed_definitions(context_words, target_word)
 	senseids_with_scores = score_parsed_definitions(definition_glob, target_definitions)
-	if verbose: print_definition_scores(senseids_with_scores)
-	highest = senseids_with_scores[0][1]
-	best_def = senseids_with_scores[0][0]
-	for pair in senseids_with_scores:
-		score = pair[1]
-		senseid = pair[0]
-		if score > highest:
-			highest = score
-			best_def = senseid
+	best_def = max(senseids_with_scores.iteritems(), key=operator.itemgetter(1))[0]
 	return best_def
 
 def predict_random(target_word):
@@ -84,26 +78,15 @@ def predict_definition_by_trained_context(context, target_word, description):
 		senseid = data[2]
 		if not contexts[target_word].get(senseid):
 			continue
-		history = contexts[target_word][senseid][description]	
-		for c in range(len(context)):
-			curr = context[c]
-			if c < len(context) -1: next = context[c+1]
-			else: next = "" 
-			for h in range(len(history)):
-				currh = history[h]				
-				if c < len(history) -1: nexth = history[c+1]
-				else: nexth = ""
-				if curr == currh: 
-					scores[senseid] = scores.get(senseid, 0) + 1
-					if next == nexth: scores[senseid] = scores.get(senseid, 0) + 2
+		history = contexts[target_word][senseid][description]
+		for c in context:
+			for h in history:
+				if c == h: scores[senseid] = scores.get(senseid, 0) + 1
+		scores[senseid] = float(scores.get(senseid, 0)) / float(len(history)) * (float(contexts[target_word][senseid]["count"]) / contexts[target_word]["total"])
 
-	best_def = scores.keys()[0]
-	best_score = scores[scores.keys()[0]]
-	for senseid in scores.keys():
-		score = scores[senseid]
-		if score > best_score:
-			best_score = score
-			best_def = senseid
+	res = max(scores.iteritems(), key=operator.itemgetter(1))
+	best_def, score = res[0], res[1]
+	if not score: raise Exception("Fallback to other methods.")
 	return best_def
 
 def score_contexts(context_target, context_history):
@@ -134,13 +117,9 @@ def predict_definition_by_trained_context_defs(context, target_word, description
 		con = contexts[target_word][senseid][description]
 		con = list(set(con))
 		scores[senseid] = score_contexts(context, con)
-	best_def = scores.keys()[0]
-	best_score = scores[scores.keys()[0]]
-	for senseid in scores.keys():
-		score = scores[senseid]
-		if score > best_score:
-			best_score = score
-			best_def = senseid
+	res = max(scores.iteritems(), key=operator.itemgetter(1))
+	best_def, score = res[0], res[1]	
+	if not score: raise Exception("Fallback to other methods.")
 	return best_def
 
 

@@ -158,7 +158,38 @@ Lesk Fallback:
 Skipgram: .5710
 Sentence: .5725
 
+- points for consec and word match
+Sentence: .6041
+Skipgram: .6046
+
+^ "" + remove set-ifying context def approach:
+Sentence: .6031
+Skipgram: .6046
 
 
+Reverted to stable state (+2 for consec, double fallback = .6046 for sentence, .6056 for skipgram)
+New approach: Scale each score by count(senseid) / sum(count(senseids) for target)
+initial (with fallback disabled, so sometimes a 0 score was chosen): 58.12
 
+Sentence (accidently ran on skipgram data): .6041
+Skipgram: .6051
+Sentence: .6041
+
+Set-ifying context matches, no consecutive points anymore
+Skipgram: .5908
+Sentence: .5964
+
+Reverted previous change.  Tracking success on each word in my test set:
+see "word success breakdown" image
+
+Removed consecutive:
+Sentence: .6036
+Skipgram: .6046
+
+Going back to try the "largest" words context.  Falling back 13% of the time with skipgram.  maybe largest
+words grabs a bigger / more reliable context
+Largest: .5959
+
+Sentence: Divide by len history as well as scale by prob
+.6071
 
