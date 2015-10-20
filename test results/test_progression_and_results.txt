@@ -182,7 +182,7 @@ Sentence: .5964
 Reverted previous change.  Tracking success on each word in my test set:
 see "word success breakdown" image
 
-Removed consecutive:
+Removed consecutive: consecutive doesn't make any sense, we're removing some words during filtering...
 Sentence: .6036
 Skipgram: .6046
 
@@ -193,3 +193,30 @@ Largest: .5959
 Sentence: Divide by len history as well as scale by prob
 .6071
 
+Ran "all words" again, and turns out its not super slow.  Not fast per average case but has almost no fallbacks.
+Jumped the kaggle score to 58%. (new best)
+Local test on 25%: .6438
+
+Adding "example" for a sense to the context history for the sense.  Added new metrics that we're tracking
+Local Test: .6458 
+
+Added swapping with the next highest score if the next highest score is within .75/.9 of the score
+and has a higher proportion of seen senses
+.75: .6270 (39 passed swaps, 122 failed ones)
+.90: .6346 (10 passed swaps, 56 failed ones)
+
+Testing kaggle with no swaps vs swaps at .95
+No swaps: .5756
+.95: .5791
+
+Kaggle seems worse with the examples added to hist.  Removing examples:
+.95 (examples removed): .57454
+
+Swaps at .95 didnt seem to help.  scrapping this approach too.
+tracked how many pass/fail under a low score threshold.  (8 passed under score .001, 7 failed)
+
+New strat: what if we dont filter out adjectives? maybe filtering out some useful words
+25% test set: .6346 (vs .6438)
+
+No filter:
+25% test set: 

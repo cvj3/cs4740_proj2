@@ -7,8 +7,8 @@ if TEST_BY_SENTENCE:
 	if WRITE_TEST: from data.contextDataFull import wsddata as contexts
 	else: from data.contextData import wsddata as contexts
 else: 
-	if WRITE_TEST: from data.contextSkipFull import wsddata as contexts
-	else: from data.contextSkip import wsddata as contexts
+	if WRITE_TEST: from data.contextAllNoFilterFull import wsddata as contexts
+	else: from data.contextAllNoFilter import wsddata as contexts
 import sys
 import datetime
 from common import *
@@ -61,15 +61,13 @@ def score_parsed_definitions(definition_glob, target_definitions):
 def predict_definition(context_words, target_word, verbose=False):
 	definition_glob, target_definitions = words_to_parsed_definitions(context_words, target_word)
 	senseids_with_scores = score_parsed_definitions(definition_glob, target_definitions)
-	best_def = max(senseids_with_scores.iteritems(), key=operator.itemgetter(1))[0]
-	return best_def
+	best_def, score = max(senseids_with_scores.iteritems(), key=operator.itemgetter(1))
+	return best_def, score
 
 def predict_random(target_word):
 	definitions = defs[target_word]["defs_and_examples"]
 	ind = randint(0, len(definitions) - 1)
 	return definitions[ind][2]
-
-
 
 def predict_definition_by_trained_context(context, target_word, description):
 	target_definitions = defs[target_word]["defs_and_examples"]
@@ -87,7 +85,7 @@ def predict_definition_by_trained_context(context, target_word, description):
 	res = max(scores.iteritems(), key=operator.itemgetter(1))
 	best_def, score = res[0], res[1]
 	if not score: raise Exception("Fallback to other methods.")
-	return best_def
+	return best_def, score
 
 def score_contexts(context_target, context_history):
 	score = 0
@@ -118,9 +116,9 @@ def predict_definition_by_trained_context_defs(context, target_word, description
 		con = list(set(con))
 		scores[senseid] = score_contexts(context, con)
 	res = max(scores.iteritems(), key=operator.itemgetter(1))
-	best_def, score = res[0], res[1]	
+	best_def, score = res[0], res[1]
 	if not score: raise Exception("Fallback to other methods.")
-	return best_def
+	return best_def, score
 
 
 

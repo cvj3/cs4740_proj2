@@ -25,7 +25,8 @@ def filter_tokens(tokens):
 		pos = pair[1]
 		token = token.lower().strip()
 		if not any(char.isalnum() for char in token): continue #if all punct
-		elif not ("N" in pos and not "I" in pos): continue #https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
+		elif not (("N" in pos and not "I" in pos) or "J" in pos): continue #https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
+		#above, keeps all nouns, throws out prepositions + conjunctions (IN), and keeps adjectives
 		else:
 			token = lm.lemmatize(token)
 			filtered_tokens.append(token)
@@ -37,3 +38,10 @@ def write_results_to_csv(results, filename):
 	output = "\n".join(results)
 	f.write(output)
 	f.close()
+
+if __name__ == "__main__": # test filtering tokens
+	import sys
+	args = sys.argv
+	filtered = filter_tokens(nltk.word_tokenize(args[1]))
+	print filtered
+	print "\nLength: %d" % len(filtered)

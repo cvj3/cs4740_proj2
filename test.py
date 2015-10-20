@@ -11,6 +11,11 @@ if __name__ == "__main__":
 	start()
 	results = []
 	counts = {}
+	scores = []
+	lowest_correct_score = 100
+	threshold = .001
+	pass_under_threshold = 0
+	fail_under_threshold = 0
 	if not WRITE_TEST: splitter = 0 # tracks index to help split training data into 75% for training, and 25% for test.
 	count = 0
 	for i in range(len(test_set)):
@@ -29,18 +34,19 @@ if __name__ == "__main__":
 			summary["total"] = summary.get("total", 0) + 1
 			print "TEST " + str(i + 1) + ": " + target.upper()			
 		try:
-			prediction = predict_definition_by_trained_context(context, target, description)
+			prediction, score = predict_definition_by_trained_context(context, target, description)
 			source = 1
 		except:
 			try:
-				prediction = predict_definition_by_trained_context_defs(context, target, description) #fall back to context def matching if no match between contexts
+				prediction, score = predict_definition_by_trained_context_defs(context, target, description) #fall back to context def matching if no match between contexts
 				counts["Context Def Fallbacks"] = counts.get("Context Def Fallbacks", 0) + 1
 				source = 2
 			except:
-				prediction = predict_definition(context, target) #Fall back to Lesk approach if no match between context defs
+				prediction, score = predict_definition(context, target) #Fall back to Lesk approach if no match between context defs
 				counts["Lesk Fallbacks"] = counts.get("Lesk Fallbacks", 0) + 1
 				source = 3
 		results.append(instance + "," + prediction)
+		scores.append(score)
 		if WRITE_TEST and not (i % 10): print "Parsed line: %d" % (i)
 		if not WRITE_TEST:
 			result = "FAIL"
@@ -50,7 +56,11 @@ if __name__ == "__main__":
 				if source == 3: counts["Lesk Fallback Successes"] = counts.get("Lesk Fallback Successes", 0) + 1
 				result = "PASS"
 				summary[description] = summary.get(description, 0) + 1
-			print "\t" + description + "-" + "context" + "\t-\t" + result	
+				if score < lowest_correct_score: lowest_correct_score = score
+				if score < threshold: pass_under_threshold += 1
+			else:
+				if score < threshold: fail_under_threshold += 1
+			print "\t" + description + "-" + "context" + "\t-\t" + result + " - " + str(score)
 
 	if not WRITE_TEST:
 		print "\n\nSUMMARY"
@@ -68,3 +78,9 @@ if __name__ == "__main__":
 
 	for key in counts.keys():
 		print key + ": %d" % counts[key]
+
+	print "\nAvg Score: %f" % (float(sum(scores))/float(len(scores)))
+	print "Lowest Correct Score: %f" % lowest_correct_score
+	print "Preset Threshold Score: %f" % threshold
+	print "\tPassed While Under Threshold: %d" % pass_under_threshold
+	print "\tFailed While Under Threshold: %d" % fail_under_threshold
