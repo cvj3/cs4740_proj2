@@ -84,7 +84,7 @@ if __name__ == "__main__":
 			contexts[target]["total"] = contexts[target].get("total", 0) + 1
 	end("Finished building Context object")
 	start()
-	file_name = "contextDataSyn"
+	file_name = "contextDataFilter"
 	if TEST_BY_SENTENCE: file_name = "contextData"
 	if WRITE_TEST: file_name = file_name + "Full"
 	writeData("data", file_name + ".py", contexts)

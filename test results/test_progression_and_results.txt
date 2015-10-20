@@ -290,6 +290,14 @@ Add example to seen history (token and filter it):
 no effect on results
 
 Remove len(hist) downscaling:
-61.17% vs 63.61%
+61.17% vs 63.96%
 
 Synset context history (every token in context history is made into a list of synonyms and put back) - not done for curr_context:
+61.17% vs 63.96%
+
+downscale on length of unique history context elements
+62.49% vs 63.96%
+
+Not filtering out tokens <= 3 in length, not filtering tokens that are purely numeric
+62.13% vs 63.96%
+
