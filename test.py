@@ -13,9 +13,11 @@ if __name__ == "__main__":
 	counts = {}
 	scores = []
 	lowest_correct_score = 100
-	threshold = .001
+	threshold = .0025
 	pass_under_threshold = 0
 	fail_under_threshold = 0
+	wordsuccess = {}
+	wordtotal = {}
 	if not WRITE_TEST: splitter = 0 # tracks index to help split training data into 75% for training, and 25% for test.
 	count = 0
 	for i in range(len(test_set)):
@@ -24,7 +26,6 @@ if __name__ == "__main__":
 		answers = test_set[i]["answer_ids"]
 		instance = test_set[i]["id"]
 		context, description = get_context(text, target)
-			
 		if not WRITE_TEST:
 			splitter += 1
 			if splitter < 4: # Every 4th training item is used for testing.
@@ -32,6 +33,7 @@ if __name__ == "__main__":
 			else:
 				splitter = 0
 			summary["total"] = summary.get("total", 0) + 1
+			wordtotal[target] = wordtotal.get(target, 0) + 1
 			print "TEST " + str(i + 1) + ": " + target.upper()			
 		try:
 			prediction, score = predict_definition_by_trained_context(context, target, description)
@@ -58,6 +60,7 @@ if __name__ == "__main__":
 				summary[description] = summary.get(description, 0) + 1
 				if score < lowest_correct_score: lowest_correct_score = score
 				if score < threshold: pass_under_threshold += 1
+				wordsuccess[target] = wordsuccess.get(target, 0) + 1
 			else:
 				if score < threshold: fail_under_threshold += 1
 			print "\t" + description + "-" + "context" + "\t-\t" + result + " - " + str(score)
@@ -84,3 +87,7 @@ if __name__ == "__main__":
 	print "Preset Threshold Score: %f" % threshold
 	print "\tPassed While Under Threshold: %d" % pass_under_threshold
 	print "\tFailed While Under Threshold: %d" % fail_under_threshold
+
+	print "\n"
+	for word in wordtotal.keys():
+		print word + ": %f" % (float(wordsuccess.get(word,0))/float(wordtotal.get(word, 0)))

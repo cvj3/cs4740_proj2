@@ -218,5 +218,78 @@ tracked how many pass/fail under a low score threshold.  (8 passed under score .
 New strat: what if we dont filter out adjectives? maybe filtering out some useful words
 25% test set: .6346 (vs .6438)
 
-No filter:
-25% test set: 
+Switched to stopword filtering for much better performance (2 min instead of 20 min to run one test):
+Perf: 63.61%
+
+Threshold Investigation:
+Avrg Score: .0196
+Lowest Score: .0012
+
+	Threshold = .005:
+		Below that pass: 55
+		Below that fail: 80
+
+	Threshold = .0025:
+		Below that pass: 9
+		Below that fail: 18
+
+Reverting to majority sense if score below threshold:
+t=.0025: had 3 pass, 24 fail.  Did worse this way...
+
+Looking into predicting majority sense or using other methods for words we're scoring poorly on:
+Worst words:
+simple: 22%
+judgement: 25%
+solid: 21%
+
+for above words, predicting majority sense
+Total perf: 63.40%  vs 63.61%
+simple: 0%
+judgement: 25%
+solid: 7%
+
+for above words, falling back to context defs
+Total perf:63.51% vs 63.61%
+simple: 0%
+judgement: 25%
+solid: 21%
+
+for above words, falling back to context defs (now properly scaled for senseid frequency)
+Total perf:63.71% vs 63.61%
+simple: 33%
+judgement: 25%
+solid: 28%
+
+Judgement doesn't seem to be affected.  Apparently it's spelled "judgement"
+for above words, falling back to context defs (now properly scaled for senseid frequency)
+Total perf: 63.66% vs 63.61%
+simple: 33%
+judgement: 18.75%
+solid: 28%
+
+^ above + dividing by length of history glob
+Total perf: 63.66% vs 63.61%
+simple: 33%
+judgement: 18.75%
+solid: 28%
+
+Scrapping all of the above.  going to test on whole test set with training on whole test test.  Will then look at 
+worst performers, since most things should be passing really well when self-validating...
+83% accuracy when trained and tested on itself.  Words that did really poorly:
+argument: 63%
+begin: 64%
+ask: 62%
+
+Stemming now on top of lemmatizing:
+62.85%
+
+No stemming or lemmatizing:
+63.96% vs 63.61%
+
+Add example to seen history (token and filter it):
+no effect on results
+
+Remove len(hist) downscaling:
+61.17% vs 63.61%
+
+Synset context history (every token in context history is made into a list of synonyms and put back) - not done for curr_context:

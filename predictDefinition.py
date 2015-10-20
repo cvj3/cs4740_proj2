@@ -4,11 +4,11 @@ from nltk.corpus import wordnet as wn
 from lib.Dictionary import wsdDictionary as defs
 from config import TEST_BY_SENTENCE, WRITE_TEST
 if TEST_BY_SENTENCE: 	
-	if WRITE_TEST: from data.contextDataFull import wsddata as contexts
-	else: from data.contextData import wsddata as contexts
+	if WRITE_TEST: from data.contextDataSentFull import wsddata as contexts
+	else: from data.contextDataSent import wsddata as contexts
 else: 
-	if WRITE_TEST: from data.contextAllNoFilterFull import wsddata as contexts
-	else: from data.contextAllNoFilter import wsddata as contexts
+	if WRITE_TEST: from data.contextDataAllFull import wsddata as contexts
+	else: from data.contextDataRaw import wsddata as contexts
 import sys
 import datetime
 from common import *
@@ -69,6 +69,17 @@ def predict_random(target_word):
 	ind = randint(0, len(definitions) - 1)
 	return definitions[ind][2]
 
+def predict_majority_sense(target_word):
+	biggest = 0
+	best_def = ""
+	for senseid in contexts[target_word].keys():
+		if senseid in ["total", "U"]: continue
+		count = contexts[target_word][senseid]["count"]
+		if count > biggest:
+			biggest = count
+			best_def = senseid
+	return senseid
+
 def predict_definition_by_trained_context(context, target_word, description):
 	target_definitions = defs[target_word]["defs_and_examples"]
 	scores = {}
@@ -115,6 +126,7 @@ def predict_definition_by_trained_context_defs(context, target_word, description
 		con = contexts[target_word][senseid][description]
 		con = list(set(con))
 		scores[senseid] = score_contexts(context, con)
+		scores[senseid] = float(scores.get(senseid, 0)) * (float(contexts[target_word][senseid]["count"]) / contexts[target_word]["total"])
 	res = max(scores.iteritems(), key=operator.itemgetter(1))
 	best_def, score = res[0], res[1]
 	if not score: raise Exception("Fallback to other methods.")

@@ -79,13 +79,12 @@ if __name__ == "__main__":
 			contexts[target][senseid] = contexts[target].get(senseid, {})				
 			contexts[target][senseid][description] = contexts[target][senseid].get(description, [])
 			contexts[target][senseid][description] += context
-			contexts[target][senseid][description].append("<") #delim to prevent consecutive matches between different context groups
 			contexts[target][senseid][description] = [x for x in contexts[target][senseid][description] if x != "tar"]
 			contexts[target][senseid]["count"] =  contexts[target][senseid].get("count", 0) + 1
 			contexts[target]["total"] = contexts[target].get("total", 0) + 1
 	end("Finished building Context object")
 	start()
-	file_name = "contextAllNoFilter"
+	file_name = "contextDataSyn"
 	if TEST_BY_SENTENCE: file_name = "contextData"
 	if WRITE_TEST: file_name = file_name + "Full"
 	writeData("data", file_name + ".py", contexts)

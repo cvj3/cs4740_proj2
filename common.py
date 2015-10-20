@@ -1,7 +1,13 @@
 import datetime
-from nltk.stem.wordnet import WordNetLemmatizer
 import nltk
-lm = WordNetLemmatizer()
+#from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.corpus import wordnet as wn
+#from nltk.stem.snowball import SnowballStemmer
+#s = SnowballStemmer("english")
+from nltk.corpus import stopwords
+stopwords = stopwords.words("english")
+
+#lm = WordNetLemmatizer()
 
 
 TIMER = None
@@ -19,16 +25,18 @@ def end(message):
 
 def filter_tokens(tokens):
 	filtered_tokens = []
-	tokens_with_pos = nltk.pos_tag(tokens)
-	for pair in tokens_with_pos:
-		token = pair[0]
-		pos = pair[1]
+	for token in tokens:
 		token = token.lower().strip()
+		#token = lm.lemmatize(token)
 		if not any(char.isalnum() for char in token): continue #if all punct
-		elif not (("N" in pos and not "I" in pos) or "J" in pos): continue #https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
-		#above, keeps all nouns, throws out prepositions + conjunctions (IN), and keeps adjectives
+		if token in stopwords: continue # if token is a stopword
+		if token == "n't": continue # if token has useless word fragment
+		if len(token) <= 3: continue # if token is very short
+		if token.isdigit(): continue # if all numerals
+		if "/tar" in token: continue # if token has target tag still remaining
 		else:
-			token = lm.lemmatize(token)
+			#add = [x.name().split(".")[0] for x in wn.synsets(token)]
+			#filtered_tokens += add
 			filtered_tokens.append(token)
 	return filtered_tokens
 
