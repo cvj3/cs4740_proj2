@@ -1,4 +1,4 @@
-TEST_BY_SENTENCE = False
+TEST_BY_SENTENCE = True
 WRITE_TEST = True
-RESULTS_FILE = "stopwords-raw"
-BUILD = "stemming now too" # String descriptor to remember what change was made
+RESULTS_FILE = "sentence-raw"
+BUILD = "sentence raw" # String descriptor to remember what change was made

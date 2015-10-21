@@ -301,3 +301,6 @@ downscale on length of unique history context elements
 Not filtering out tokens <= 3 in length, not filtering tokens that are purely numeric
 62.13% vs 63.96%
 
+sentence based-raw: 62.54%
+sentence based-filtered: 61.88%
+

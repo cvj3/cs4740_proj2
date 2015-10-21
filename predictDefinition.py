@@ -4,11 +4,11 @@ from nltk.corpus import wordnet as wn
 from lib.Dictionary import wsdDictionary as defs
 from config import TEST_BY_SENTENCE, WRITE_TEST
 if TEST_BY_SENTENCE: 	
-	if WRITE_TEST: from data.contextFull import wsddata as contexts
-	else: from data.context import wsddata as contexts
+	if WRITE_TEST: from data.contextSentRawFull import wsddata as contexts
+	else: from data.contextSentRaw import wsddata as contexts
 else: 
-	if WRITE_TEST: from data.contextDataRawFull import wsddata as contexts
-	else: from data.contextDataRaw import wsddata as contexts
+	if WRITE_TEST: from data.contextSentRawFull import wsddata as contexts
+	else: from data.contextSentRaw import wsddata as contexts
 import sys
 import datetime
 from common import *

@@ -27,7 +27,7 @@ def filter_tokens(tokens):
 	filtered_tokens = []
 	for token in tokens:
 		token = token.lower().strip()
-		token = lm.lemmatize(token)
+		#token = lm.lemmatize(token)
 		if not any(char.isalnum() for char in token): continue #if all punct
 		if token in stopwords: continue # if token is a stopword
 		if token == "n't": continue # if token has useless word fragment
@@ -35,8 +35,8 @@ def filter_tokens(tokens):
 		if token.isdigit(): continue # if all numerals
 		if "/tar" in token: continue # if token has target tag still remaining
 		else:			
-			#filtered_tokens.append(token)
-			filtered_tokens.append(s.stem(token))
+			filtered_tokens.append(token)
+			#filtered_tokens.append(s.stem(token))
 	return filtered_tokens
 
 def write_results_to_csv(results, filename):

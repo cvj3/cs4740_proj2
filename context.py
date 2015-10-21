@@ -54,10 +54,10 @@ def get_context_from_all_words(text, target):
 	return context
 
 def get_context(text, target):
-	#if TEST_BY_SENTENCE: context, description = get_context_from_sentence(text, target), "Sentence"
-	#else: context, description = get_skipgram(text, target), "Skipgram"
+	if TEST_BY_SENTENCE: context, description = get_context_from_sentence(text, target), "Sentence"
+	else: context, description = get_skipgram(text, target), "Skipgram"
 	#context, description = get_context_from_largest_words(text, target), "Largest Words"
-	context, description = get_context_from_all_words(text, target), "All Words"
+	#context, description = get_context_from_all_words(text, target), "All Words"
 	return context, description
 
 if __name__ == "__main__":
@@ -85,7 +85,7 @@ if __name__ == "__main__":
 	end("Finished building Context object")
 	start()
 	file_name = "contextDataFilter"
-	if TEST_BY_SENTENCE: file_name = "contextData"
+	if TEST_BY_SENTENCE: file_name = "contextSentFilter"
 	if WRITE_TEST: file_name = file_name + "Full"
 	writeData("data", file_name + ".py", contexts)
 	#writeData("data", "contextLargestFull.py", contexts)
