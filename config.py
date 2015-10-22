@@ -1,4 +1,4 @@
-TEST_BY_SENTENCE = True
-WRITE_TEST = True
-RESULTS_FILE = "sentence-raw"
-BUILD = "sentence raw" # String descriptor to remember what change was made
+TEST_BY_SENTENCE = False
+WRITE_TEST = False
+RESULTS_FILE = "RESULTSFILE"
+BUILD = "BUILDPHRASE" # String descriptor to remember what change was made

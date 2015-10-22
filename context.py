@@ -55,9 +55,9 @@ def get_context_from_all_words(text, target):
 
 def get_context(text, target):
 	if TEST_BY_SENTENCE: context, description = get_context_from_sentence(text, target), "Sentence"
-	else: context, description = get_skipgram(text, target), "Skipgram"
+	else: context, description = get_context_from_all_words(text, target), "All Words"
 	#context, description = get_context_from_largest_words(text, target), "Largest Words"
-	#context, description = get_context_from_all_words(text, target), "All Words"
+	#context, description = get_skipgram(text, target), "Skipgram"
 	return context, description
 
 if __name__ == "__main__":
