@@ -26,6 +26,7 @@ We recommend TEST_BY_SENTENCE to be set to False and WRITE_TEST to be set to Fal
 in action on our local test set.
 
 Once these flags are set, save the file, and run "python test.py" from the command line.
+You will see the percentage accuracy of the test run in the line under "Summary" (for WRITE_TEST = False)
 
 You may need to install some nltk libraries if you have not done so.  Open a python shell, type:
 import nltk
