@@ -1,4 +1,0 @@
-Context Word Strategies:
-	-Previous 4-5 words.  Filter out irrelevant words.  Choose up to two words from the right of the list
-	-Count length of all words in sentence.  Choose all words that are of the largest 2-3 lengths as context words (perhaps limit length to 8-10)
-	-Brute Force: filter out irrelevant words, blob the definitions of ALL words as context words.
