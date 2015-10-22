@@ -13,7 +13,7 @@ if __name__ == "__main__":
 	counts = {}
 	scores = []
 	lowest_correct_score = 100
-	threshold = .0025
+	threshold = 10
 	pass_under_threshold = 0
 	fail_under_threshold = 0
 	wordsuccess = {}

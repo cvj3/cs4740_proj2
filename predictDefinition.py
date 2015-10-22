@@ -91,7 +91,7 @@ def predict_definition_by_trained_context(context, target_word, description):
 		for c in context:
 			for h in history:
 				if c == h: scores[senseid] = scores.get(senseid, 0) + 1
-		scores[senseid] = float(scores.get(senseid, 0)) / float(len(history)) * (float(contexts[target_word][senseid]["count"]) / contexts[target_word]["total"])
+		#scores[senseid] = float(scores.get(senseid, 0)) / float(len(history)) * (float(contexts[target_word][senseid]["count"]) / contexts[target_word]["total"])
 
 	res = max(scores.iteritems(), key=operator.itemgetter(1))
 	best_def, score = res[0], res[1]

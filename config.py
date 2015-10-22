@@ -5,8 +5,8 @@ TEST_BY_SENTENCE = True
 WRITE_TEST = False
 
 # csv file name, if WRITE_TEST = True
-RESULTS_FILE = "RESULTSFILE"
+RESULTS_FILE = "no-scaling"
 
 # String descriptor to remember what change was made
 # very useful for debug output at the end of a slow processing run
-BUILD = "BUILDPHRASE"
+BUILD = "no bayes-ian scaling"

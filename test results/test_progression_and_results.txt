@@ -304,3 +304,6 @@ Not filtering out tokens <= 3 in length, not filtering tokens that are purely nu
 sentence based-raw: 62.54%
 sentence based-filtered: 61.88%
 
+No naive bayes scaling (len hist or based on sense count / total)
+63.61% vs 63.91% (not as big a difference as expected)
+This was 57.2 on kaggle, vs 56.1 previously.  We may go back and look at pre-stopwords, see if we can get 59% over our 58% with this.
