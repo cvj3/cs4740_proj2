@@ -28,6 +28,21 @@ ADDITIONAL_POINTS_FOR_SIMPLIFIED_LESK = 4
 # POINTS_FOR_EXAMPLE_MATCH = .5 #not currently being used
 
 
+# random prediction logic
+def predict_random(target_word):
+    definitions = defs[target_word]["defs_and_examples"]
+    ind = randint(0, len(definitions) - 1)
+    return definitions[ind][2]
+
+
+# simplified lesk logic: begin
+def predict_definition(context_words, target_word, verbose=False):
+    definition_glob, target_definitions = words_to_parsed_definitions(context_words, target_word)
+    senseids_with_scores = score_parsed_definitions(definition_glob, target_definitions)
+    best_def, score = max(senseids_with_scores.iteritems(), key=operator.itemgetter(1))
+    return best_def, score
+
+
 def words_to_parsed_definitions(context_words, target_word):
     definition_glob = []
     for word in context_words:
@@ -67,34 +82,10 @@ def score_parsed_definitions(definition_glob, target_definitions):
 #                consecutive = False
         scores[senseid] = score
     return scores
+# simplified lesk logic: end
 
 
-def predict_definition(context_words, target_word, verbose=False):
-    definition_glob, target_definitions = words_to_parsed_definitions(context_words, target_word)
-    senseids_with_scores = score_parsed_definitions(definition_glob, target_definitions)
-    best_def, score = max(senseids_with_scores.iteritems(), key=operator.itemgetter(1))
-    return best_def, score
-
-
-def predict_random(target_word):
-    definitions = defs[target_word]["defs_and_examples"]
-    ind = randint(0, len(definitions) - 1)
-    return definitions[ind][2]
-
-
-def predict_majority_sense(target_word):
-    biggest = 0
-#    best_def = ""
-    for senseid in contexts[target_word].keys():
-        if senseid in ["total", "U"]:
-            continue
-        count = contexts[target_word][senseid]["count"]
-        if count > biggest:
-            biggest = count
-#            best_def = senseid
-    return senseid
-
-
+# all context dictionary definitions: begin
 def predict_definition_by_trained_context(context, target_word, description):
     target_definitions = defs[target_word]["defs_and_examples"]
     scores = {}
@@ -110,6 +101,27 @@ def predict_definition_by_trained_context(context, target_word, description):
         # scores[senseid] = float(scores.get(senseid, 0)) / float(len(history)) \
         #     * (float(contexts[target_word][senseid]["count"]) / contexts[target_word]["total"])
 
+    res = max(scores.iteritems(), key=operator.itemgetter(1))
+    best_def, score = res[0], res[1]
+    if not score:
+        raise Exception("Fallback to other methods.")
+    return best_def, score
+# all context dictionary definitions: end
+
+
+# improved context using history: begin
+def predict_definition_by_trained_context_defs(context, target_word, description):
+    target_definitions = defs[target_word]["defs_and_examples"]
+    scores = {}
+    context = list(set(context))
+    for data in target_definitions:
+        senseid = data[2]
+        if not contexts[target_word].get(senseid):
+            continue
+        con = contexts[target_word][senseid][description]
+        con = list(set(con))
+        scores[senseid] = score_contexts(context, con)
+        scores[senseid] = float(scores.get(senseid, 0)) * (float(contexts[target_word][senseid]["count"]) / contexts[target_word]["total"])
     res = max(scores.iteritems(), key=operator.itemgetter(1))
     best_def, score = res[0], res[1]
     if not score:
@@ -133,25 +145,20 @@ def score_contexts(context_target, context_history):
         if item in his_glob:
             score += 1
     return score
+# improved context using history: end
 
 
-def predict_definition_by_trained_context_defs(context, target_word, description):
-    target_definitions = defs[target_word]["defs_and_examples"]
-    scores = {}
-    context = list(set(context))
-    for data in target_definitions:
-        senseid = data[2]
-        if not contexts[target_word].get(senseid):
+def predict_majority_sense(target_word):
+    biggest = 0
+#    best_def = ""
+    for senseid in contexts[target_word].keys():
+        if senseid in ["total", "U"]:
             continue
-        con = contexts[target_word][senseid][description]
-        con = list(set(con))
-        scores[senseid] = score_contexts(context, con)
-        scores[senseid] = float(scores.get(senseid, 0)) * (float(contexts[target_word][senseid]["count"]) / contexts[target_word]["total"])
-    res = max(scores.iteritems(), key=operator.itemgetter(1))
-    best_def, score = res[0], res[1]
-    if not score:
-        raise Exception("Fallback to other methods.")
-    return best_def, score
+        count = contexts[target_word][senseid]["count"]
+        if count > biggest:
+            biggest = count
+#            best_def = senseid
+    return senseid
 
 
 # usage: 'main.py [context_word1,context_word2] target_word'
