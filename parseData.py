@@ -18,7 +18,7 @@ def main(param1, param2):
 
 
 def buildData(path, filename, verboseMode=False):
-    wsdData = [] # {}
+    wsdData = []
 
     dir = os.path.dirname(__file__)
     filename = os.path.join(dir, path + '/' + filename)
@@ -48,7 +48,7 @@ def buildData(path, filename, verboseMode=False):
                 answerID = []
                 instanceID = instance.get("id")
                 for answer in instance.iter('answer'):
-                    answerID.append(answer.get("senseid"))       
+                    answerID.append(answer.get("senseid"))
                 thisContext = ""
                 for context in instance.iter('context'):
                     for text in context.itertext():
@@ -57,23 +57,16 @@ def buildData(path, filename, verboseMode=False):
                         thisContext += text
                 thisContext += os.linesep
                 thisContext = thisContext.strip().replace("\r", "").replace("\n", "").replace(" n't", "n't")
-                thisContext = thisContext.replace(" '", "'") #s.replace("'", r"\'")                
+                thisContext = thisContext.replace(" '", "'")  # s.replace("'", r"\'")
                 # build data object
                 wsdData.append({"word": key_word, "type": part_of_speech, "id": instanceID,
-                                "answer_ids": answerID, "context": thisContext })
-            # training_set [ list of ????
-            #                {
-            #                  "word": ''
-            #                  , "type": ''
-            #                  , "context": ''
-            #                  , "answer_id": ''
-            #                }
-            # ]
+                                "answer_ids": answerID, "context": thisContext})
 
             # wsdData[key_word] = wsdData.get(key_word, {})
             # wsdData[key_word]["defs_and_examples"] = entryDef
             # wsdData[key_word]["type"] = part_of_speech
     except ET.ParseError as e:
+        # if error occurs while parsing, create a debug dump with some useful information
         formatted_e = str(e)
         line = int(formatted_e[formatted_e.find("line ") + 5: formatted_e.find(",")])
         column = int(formatted_e[formatted_e.find("column ") + 7:])

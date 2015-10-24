@@ -14,8 +14,8 @@ def main(param1, param2):
     # Write out to a dictionary file (lib/Dictionary.py)
     writeDictionary(param1, param2, wsdDictionary)
 
+    # done
     quit()
-    # TODO: parse training data, and output to dictionary format
 
 
 def buildDictionary(path, filename, verboseMode=False):
