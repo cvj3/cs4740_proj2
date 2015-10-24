@@ -9,9 +9,11 @@ POS_FILTER = True
 
 # if True uses 100% data, else 75% training and then tests on 25%
 WRITE_TEST = False
-# if WRITE_TEST = True, then process aborts after processing WRITE_LIMIT records
-# WARNING: NOT CURRENTLY IMPLEMENTED!!
-WRITE_LIMIT = 1000
+# if True, only failed results are included in test debug output
+FAIL_DEBUG_ONLY = True
+
+# value must be greater than zero, or will be ignored
+WRITE_LIMIT = 8000
 
 
 # csv file name, if WRITE_TEST = True
@@ -20,4 +22,4 @@ RESULTS_FILE = "kaggle-test"
 
 # String descriptor to remember what change was made
 # very useful for debug output at the end of a slow processing run
-BUILD = "EXPERIMENT #n+1: pos filterx"
+BUILD = "EXPERIMENT #n+1: misc. test"

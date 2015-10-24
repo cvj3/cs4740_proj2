@@ -30,7 +30,14 @@ if __name__ == "__main__":
     if not WRITE_TEST:
         splitter = 0
 
-    for i in range(len(test_set)):
+    # if WRITE_LIMIT is set, then abort process at new threshold
+    if (WRITE_LIMIT > 0) and (WRITE_LIMIT < len(test_set)):  # and (WRITE_TEST)
+        loop_limit = WRITE_LIMIT
+        # print "WRITE_LIMIT SET: %d" % loop_limit
+    else:
+        loop_limit = len(test_set)
+
+    for i in range(loop_limit):
         text = test_set[i]["context"]
         target = test_set[i]["word"]
         answers = test_set[i]["answer_ids"]
@@ -46,6 +53,8 @@ if __name__ == "__main__":
             summary["total"] = summary.get("total", 0) + 1
             wordtotal[target] = wordtotal.get(target, 0) + 1
             print "TEST " + str(i + 1) + ": " + target.upper()
+
+        # if confidence level in prediction is too low, fallback to a different prediction strategy
         try:
             prediction, score = predict_definition_by_trained_context(context, target, description)
             source = 1
@@ -60,11 +69,6 @@ if __name__ == "__main__":
                 prediction, score = predict_definition(context, target)
                 counts["Lesk Fallbacks"] = counts.get("Lesk Fallbacks", 0) + 1
                 source = 3
-
-#        # Fall back to Lesk approach if no match between context defs
-#        prediction, score = predict_definition(context, target)
-#        counts["Lesk Fallbacks"] = counts.get("Lesk Fallbacks", 0) + 1
-#        source = 3
 
         results.append(instance + "," + prediction)
         scores.append(score)
@@ -89,33 +93,51 @@ if __name__ == "__main__":
             else:
                 if score < threshold:
                     fail_under_threshold += 1
-            print "\t" + description + "-" + "context" + "\t-\t" + result + " - " + str(score)
+            if (FAIL_DEBUG_ONLY and result == "FAIL") or (FAIL_DEBUG_ONLY != True):
+                print "\t" + description + "-" + "context" + "\t-\t" + result + " - " + str(score)
+#                if score == 1:
+#                    print prediction
 
-    if not WRITE_TEST:
-        print "\n\nSUMMARY"
-        for description in summary.keys():
-            if description == "total":
-                continue
-            print description + ": " + str(float(summary[description]) / summary["total"])
-        print "\n"
-        end(("Finished %d tests" % summary['total']))
-    else:
+    # write csv file for Kaggle test
+    if WRITE_TEST:
         write_results_to_csv(results, RESULTS_FILE)
         end("Finished creating test file")
 
-    print "CHANGES: " + BUILD + "\n"
-    print "POS_FILTER: %r\n" % POS_FILTER
-    print "Predicted U: %d" % count
+    # fallback use - debug output
+    if not WRITE_TEST:
+        print "\nPERFORMANCE SUMMARY"
+        for description in summary.keys():
+            if description == "total":
+                continue
+            print "\t" + description + ": " + str(float(summary[description]) / summary["total"])
+        print "\n"
+        # time stats
+        end(("\tProcessed %d tests" % summary['total']))
 
+    print "\nBUILD OPTIONS"
+    print "\tPOS Filter:\t\t%s" % ("Disabled", "Enabled")[POS_FILTER]
+    print "\tSentence Context only:\t%s" % ("Disabled", "Enabled")[TEST_BY_SENTENCE]
+    print "\tTest Limit:\t\t%d" % WRITE_LIMIT
+    print "\tNote(s):\t\t" + BUILD + "\n"
+
+    # unknown count metrics
+    print "Predicted U: %d" % count
     for key in counts.keys():
         print key + ": %d" % counts[key]
 
+    # overall prediction stat summary
     print "\nAvg Score: %f" % (float(sum(scores))/float(len(scores)))
     print "Lowest Correct Score: %f" % lowest_correct_score
     print "Preset Threshold Score: %f" % threshold
     print "\tPassed While Under Threshold: %d" % pass_under_threshold
     print "\tFailed While Under Threshold: %d" % fail_under_threshold
 
-    print "\n"
-    for word in wordtotal.keys():
+    # word-specific prediction stats (sorted by alpha order for convenience)
+    print "\nWord Accuracy"
+    for word in sorted(wordtotal.keys()):
         print word + ": %f" % (float(wordsuccess.get(word, 0))/float(wordtotal.get(word, 0)))
+
+# thoughts for diagnosing cause of failure
+# 1. word sense (e.g., is word sense 'unknown' and thus will always be wrong?)
+# 2. number of senses (e.g., does it have a large number of entries, which are subtly different?)
+# 3. is lemmatization causing issues (e.g., add vs added)

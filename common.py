@@ -61,6 +61,10 @@ def filter_tokens(tokens):
             if token in string.punctuation:
                 # print "discarding token2: %s (%s) " % (token, pos)
                 continue
+            # failsafe for a token made entirely of multiple punctuation marks
+            elif not any(char.isalnum() for char in token):
+                # print "discarding token: %s (%s) " % (token, pos)
+                continue
 
             # exclude some parts of speech (cardinal numbers, unknowns, etc)
             # Penn Treebank Tag list:
@@ -74,11 +78,6 @@ def filter_tokens(tokens):
 
             # if token is a stopword
             if token in stopwords:
-                continue
-
-            # if all punct
-            if not any(char.isalnum() for char in token):
-                print "discarding token: %s (%s) " % (token, pos)
                 continue
 
             # unused code, attempts to uses part of speech lemmatization
