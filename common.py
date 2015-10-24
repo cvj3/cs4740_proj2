@@ -1,4 +1,5 @@
 import datetime
+import string
 import nltk
 from nltk.stem.wordnet import WordNetLemmatizer
 # from nltk.corpus import wordnet as wn
@@ -50,41 +51,56 @@ def filter_tokens(tokens):
     filtered_tokens = []
 
     if POS_FILTER:
+        # get part of speech for tokens
         tokens_with_pos = nltk.pos_tag(tokens)
         for pair in tokens_with_pos:
             token = pair[0]
             pos = pair[1]
-            # strip spaces
-            token = token.lower().strip()
 
+            # skip if token is only punctuation
+            if token in string.punctuation:
+                # print "discarding token2: %s (%s) " % (token, pos)
+                continue
+
+            # exclude some parts of speech (cardinal numbers, unknowns, etc)
             # Penn Treebank Tag list:
             # https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
-
-            # parts of speech to exclude (cardinal numbers, unknowns)
             if (pos == "CD") or (pos == ".") or (pos == "AT") or (pos == "IN"):
                 # print "Discarding due to pos tag (%s): %s" % (pos, token)
                 continue
-            else:
-                # unused code, attempts to uses part of speech lemmatization
-                # # default / initialize wordnet part of speech tag variable
-                # w_pos = ''
-                # # convert treebank tags to wordnet pos
-                # # http://stackoverflow.com/questions/15586721/wordnet-lemmatization-and-pos-tagging-in-python
-                # if pos.startswith('J'):
-                #     w_pos = nltk.corpus.wordnet.ADJ
-                # elif pos.startswith('V'):
-                #     w_pos = nltk.wordnet.wordnet.VERB
-                # elif pos.startswith('N'):
-                #     w_pos = nltk.wordnet.wordnet.NOUN
-                # elif pos.startswith('R'):
-                #     w_pos = nltk.wordnet.wordnet.ADV
-                # # lemmatize; ~base word
-                # if w_pos != '':
-                #     token = lm.lemmatize(token, w_pos)
-                # else:
-                #     token = lm.lemmatize(token)
 
-                token = lm.lemmatize(token)
+            # convert to lower case and strip excess spaces
+            token = token.lower().strip()
+
+            # if token is a stopword
+            if token in stopwords:
+                continue
+
+            # if all punct
+            if not any(char.isalnum() for char in token):
+                print "discarding token: %s (%s) " % (token, pos)
+                continue
+
+            # unused code, attempts to uses part of speech lemmatization
+            # # default / initialize wordnet part of speech tag variable
+            # w_pos = ''
+            # # convert treebank tags to wordnet pos
+            # # http://stackoverflow.com/questions/15586721/wordnet-lemmatization-and-pos-tagging-in-python
+            # if pos.startswith('J'):
+            #     w_pos = nltk.corpus.wordnet.ADJ
+            # elif pos.startswith('V'):
+            #     w_pos = nltk.wordnet.wordnet.VERB
+            # elif pos.startswith('N'):
+            #     w_pos = nltk.wordnet.wordnet.NOUN
+            # elif pos.startswith('R'):
+            #     w_pos = nltk.wordnet.wordnet.ADV
+            # # lemmatize; ~base word
+            # if w_pos != '':
+            #     token = lm.lemmatize(token, w_pos)
+            # else:
+            #     token = lm.lemmatize(token)
+
+            token = lm.lemmatize(token)
 
 #                if token != s.stem(token):
 #                    print "Stemming diff (%s): %s" % (s.stem(token), token)

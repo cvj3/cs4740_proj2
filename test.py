@@ -10,6 +10,9 @@ else:
     from data.testData import wsddata as test_set
 
 
+__author__ = "Alin Barsan, Curtis Josey"
+
+
 if __name__ == "__main__":
     summary = {}
     start()
