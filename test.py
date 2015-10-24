@@ -25,10 +25,11 @@ if __name__ == "__main__":
     fail_under_threshold = 0
     wordsuccess = {}
     wordtotal = {}
+    count = 0
     # tracks index to help split training data into 75% for training, and 25% for test.
     if not WRITE_TEST:
         splitter = 0
-    count = 0
+
     for i in range(len(test_set)):
         text = test_set[i]["context"]
         target = test_set[i]["word"]
@@ -59,6 +60,12 @@ if __name__ == "__main__":
                 prediction, score = predict_definition(context, target)
                 counts["Lesk Fallbacks"] = counts.get("Lesk Fallbacks", 0) + 1
                 source = 3
+
+#        # Fall back to Lesk approach if no match between context defs
+#        prediction, score = predict_definition(context, target)
+#        counts["Lesk Fallbacks"] = counts.get("Lesk Fallbacks", 0) + 1
+#        source = 3
+
         results.append(instance + "," + prediction)
         scores.append(score)
         if WRITE_TEST and not (i % 10):
