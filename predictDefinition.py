@@ -22,9 +22,10 @@ else:
 __author__ = "Alin Barsan, Curtis Josey"
 
 
-POINTS_FOR_CONSECUTIVE_WORD = 2
-POINTS_FOR_NONCONSECUTIVE_WORD = 1
-ADDITIONAL_POINTS_FOR_SIMPLIFIED_LESK = 4
+# simplified lesk bonus points
+POINTS_FOR_CONSECUTIVE_WORD = 10 #2
+POINTS_FOR_NONCONSECUTIVE_WORD = 5 #1
+ADDITIONAL_POINTS_FOR_SIMPLIFIED_LESK = 1 #4
 # POINTS_FOR_EXAMPLE_MATCH = .5 #not currently being used
 
 
@@ -135,11 +136,25 @@ def score_contexts(context_target, context_history):
     for word in context_target:
         for syn in wn.synsets(word):
             tar_glob += nltk.word_tokenize(syn.definition())
+
+            # get synonym lemma names
+            ln = syn.lemma_names()
+            # append them
+            for l in ln:
+                tar_glob += l
+
     tar_glob = list(set(tar_glob))
     his_glob = []
     for word in context_history:
         for syn in wn.synsets(word):
             his_glob += nltk.word_tokenize(syn.definition())
+
+            # get synonym lemma names
+            ln = syn.lemma_names()
+            # append them
+            for l in ln:
+                his_glob += l
+
     his_glob = list(set(his_glob))
     for item in tar_glob:
         if item in his_glob:

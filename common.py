@@ -33,13 +33,13 @@ def end(message):
 
 
 # shared token clensing code
-def clense_token(token, debugMode = False):
+def clense_token(token, verboseMode = False):
     # convert to lower case, and remove extra spaces
     token_pre = token.lower().strip()
     # get lemma, the base form of word
     token_post = lm.lemmatize(token_pre)
 
-    if debugMode:
+    if verboseMode:
         if token_pre != token_post:
             print "%s -> %s" % (token_pre, token_post)
 

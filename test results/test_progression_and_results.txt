@@ -307,3 +307,148 @@ sentence based-filtered: 61.88%
 No naive bayes scaling (len hist or based on sense count / total)
 63.61% vs 63.91% (not as big a difference as expected)
 This was 57.2 on kaggle, vs 56.1 previously.  We may go back and look at pre-stopwords, see if we can get 59% over our 58% with this.
+
+=================================================================================
+=================================================================================
+=================================================================================
+
+simplified pos tagging based on excluding "CD" and ".", equivalent to naive filtering w/o pos tagging in accuracy.
+
+However, performance went from 80 seconds to 523 seconds while using 75% / 25% approach.
+================
+
+added special pos branch to filter_tokens
+
+ ... experimenting with only pos filters, no naive, etc.
+
+ ... also, only use lemmatization of token after performing the pos filter
+
+================
+added "AT" and "IN" to pos exclude filters and accuracy dropped from 0.627480916031 -> 0625445292621 (run time: 511s)
+
+
+================
+noticed stemming doesn't happen in filtering, attempting to stem there and rerun (pos_filter = on)
+
+.624936386768 in 522s
+
+
+================
+tried stemming instead of lemmatization (pos_filter = on)
+
+0.624427480916 in 518s; reverting back to lemmatization
+
+
+======================================
+discovered we were not using pos argument of lemmatize.  will re-run passing the pos tag into lemmatize function (pos_filter = on)
+
+this dropped accuracy ratings to 0.619338422392, run-time: 517s
+
+reverting back to default lemmatization
+
+=======================================
+
+stopwords had been off, rerunning with stopwords enabled (pos_filter = on)
+
+no impact on average accuracy, but noticable speed improvement: 480s (still slower than not using pos libraries)
+
+========================================
+
+adjusting order of filtering vs clensing to measure performance impact (pos_filter = on); time = 483s
+
+note: no notable changes
+
+========================================
+
+test: trying different method to discard tokens that are only punctuation (and moved to top of filter logic)
+purpose: improve performance
+result: minor speed improvement - 477s
+
+=======================================
+
+test: reset code back to 'simple lesk'
+purpose: compare vs original lesk accuracy ratings & performance AND vs most recent implementation
+result: 0.319592875318 in 3778s (63 minutes)
+
+=======================================
+
+test: context with lesk fallback
+purpose: compare to prior test results and vs most recent implementation
+result:
+
+==========
+
+with test by sentence on (0.596437659033; 276s)
+
+---top performers
+organization: 0.892857
+talk: 0.861111
+provide: 0.852941
+eat: 0.822222
+activate: 0.807018
+arm: 0.833333
+
+
+
+---bottom 5 performers
+simple: 0.1111111
+judgment: 0.125000
+write: 0.181818
+different: 0.25000
+treat: 0.285714
+ask: 0.318182
+
+
+==========
+
+with test by sentence OFF (0.625445292621; 491s)
+
+---prev-top performers
+organization: 0.892857 -> .857143 (down)
+talk: 0.861111 -> .916667 (up)
+provide: 0.852941 -> .882353 (up)
+eat: 0.822222 -> .80000 (down)
+activate: 0.807018 -> .807018 (no change)
+arm: 0.833333 -> 0.818182 (down)
+
+
+
+---prev-bottom 5 performers
+simple: 0.1111111 -> 0.22222 (up; ~double)
+judgment: 0.125000 -> 0.25 (up; double)
+write: 0.181818 -> 0.545455 (up; triple)
+different: 0.25000 -> 0.416667 (up; almost double)
+treat: 0.285714 -> 0.392857 (up; almost double)
+ask: 0.318182 -> 0.409091 (up)
+====
+solid: ? -> 0.142857
+
+CONCLUSION: test by sentence vs test by paragraph has a significant impact on correctingly lowest-word accuracy ratings
+
+==================================
+
+test: LESK only - first 500
+purpose: establish baseline (with faster process time)
+results: 0.496 in 237s (62 out of 125)
+options: sentence-only = false
+
+==================================
+
+test: increased bonus for consecutive word, smaller bonus for non-consecutive, decreased points for lesk
+purpose: determine impact on bonus with results
+results: 0.504 in 238 seconds
+options: sentence-only = false
+
+==================================
+
+test: added synset lemmas, with simplified lesk only; limited to 500 on first run due to slow processing
+purpose: determine if synonyms will make a noticable improvement
+results: 0.664 in 590 seconds
+
+conclusion: noticable improvement!!  need to process on larger dataset and verify results.
+
+----------------------------------
+
+test: same as above, no limit
+purpose: ...
+results: 

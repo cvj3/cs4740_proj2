@@ -54,21 +54,28 @@ if __name__ == "__main__":
             wordtotal[target] = wordtotal.get(target, 0) + 1
             print "TEST " + str(i + 1) + ": " + target.upper()
 
-        # if confidence level in prediction is too low, fallback to a different prediction strategy
-        try:
-            prediction, score = predict_definition_by_trained_context(context, target, description)
-            source = 1
-        except:
+        if STRATEGY_LESK_ONLY:
+            # Fall back to Lesk approach if no match between context defs
+            prediction, score = predict_definition(context, target)
+            counts["Lesk Fallbacks"] = counts.get("Lesk Fallbacks", 0) + 1
+            source = 3
+
+        else:
+            # if confidence level in prediction is too low, fallback to a different prediction strategy
             try:
-                # fall back to context def matching if no match between contexts
-                prediction, score = predict_definition_by_trained_context_defs(context, target, description)
-                counts["Context Def Fallbacks"] = counts.get("Context Def Fallbacks", 0) + 1
-                source = 2
+                prediction, score = predict_definition_by_trained_context(context, target, description)
+                source = 1
             except:
-                # Fall back to Lesk approach if no match between context defs
-                prediction, score = predict_definition(context, target)
-                counts["Lesk Fallbacks"] = counts.get("Lesk Fallbacks", 0) + 1
-                source = 3
+                try:
+                    # fall back to context def matching if no match between contexts
+                    prediction, score = predict_definition_by_trained_context_defs(context, target, description)
+                    counts["Context Def Fallbacks"] = counts.get("Context Def Fallbacks", 0) + 1
+                    source = 2
+                except:
+                    # Fall back to Lesk approach if no match between context defs
+                    prediction, score = predict_definition(context, target)
+                    counts["Lesk Fallbacks"] = counts.get("Lesk Fallbacks", 0) + 1
+                    source = 3
 
         results.append(instance + "," + prediction)
         scores.append(score)
